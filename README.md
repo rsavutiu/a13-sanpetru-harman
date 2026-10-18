@@ -2,9 +2,7 @@
 
 O simulare a planului autostrăzii Brașov – Bacău care, după ultima rectificare, trece razant pe lângă Sânpetru, Hărman și străpunge Rezervația Dealul Lempeș.
 
-**Traseul nou traversează situl Natura 2000 ROSCI0055 „Dealul Cetății Lempeș – Mlaștina Hărman” pe aproximativ 940 m** (traseul vechi: ~180 m).
-
-Hartă interactivă care compară **traseul nou** al autostrăzii A13 (extras din planul cadastral 1:5000, OCPI Brașov, cerere 159987/2025, Km 8–24) cu **traseul vechi** (OpenStreetMap), în dreptul localităților Sânpetru și Hărman.
+Hartă interactivă cu **traseul A13 din OpenStreetMap** (public), inclusiv nodurile rutiere Sânpetru (DJ103), Hărman (DN11) și Prejmer, comparat cu **traseul din planul cadastral OCPI** (1:5000, OCPI Brașov, cerere 159987/2025, Km 8–24). Pe hartă: situl Natura 2000 ROSCI0055 „Dealul Cetății Lempeș – Mlaștina Hărman”, zonele de 100/300/500 m față de traseul OpenStreetMap și distanțele până la Sânpetru și Hărman.
 
 - **Harta online:** https://rsavutiu.github.io/a13-sanpetru-harman/
 - **Vedere 3D:** https://rsavutiu.github.io/a13-sanpetru-harman/3d.html
@@ -13,7 +11,7 @@ Hartă interactivă care compară **traseul nou** al autostrăzii A13 (extras di
 - **Cod QR:** [`qr.png`](qr.png) · [`qr.svg`](qr.svg)
 
 ## Metodă
-Planul scanat a fost georeferențiat (transformare afină în Stereo 70 / EPSG:3844) pe căile ferate și drumurile principale din OpenStreetMap, apoi axul traseului nou a fost trasat manual. Distanța dintre marcajele kilometrice trasate iese ~1 km, ceea ce confirmă scara. Precizie estimată ±50–100 m. Porțiunea Km 18–22 este acoperită de legenda planului și este **estimată**.
+Traseul și nodurile rutiere provin din OpenStreetMap. Planul OCPI scanat a fost georeferențiat (transformare afină în Stereo 70 / EPSG:3844) pe căile ferate și drumurile principale din OpenStreetMap, apoi axul traseului OCPI a fost trasat manual. Distanța dintre marcajele kilometrice trasate iese ~1 km, ceea ce confirmă scara. Precizie estimată ±50–100 m. Pe planul OCPI, porțiunea Km 18–22 este acoperită de legendă și este **estimată**.
 
 Hartă informativă realizată de cetățeni – nu este un document oficial. Date: © OpenStreetMap contributors (ODbL); imagini satelitare © Esri; relief Mapzen/AWS Terrain Tiles.
 
