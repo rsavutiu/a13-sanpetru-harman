@@ -4,38 +4,43 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>A13 Brașov–Bacău · Sânpetru – Hărman</title>
-<meta name="description" content="Hartă interactivă: traseul vechi și traseul nou al autostrăzii A13 Brașov–Bacău în dreptul localităților Sânpetru și Hărman.">
+<meta name="description" content="Hartă interactivă: traseul autostrăzii A13 Brașov–Bacău în dreptul localităților Sânpetru și Hărman – OpenStreetMap și planul cadastral OCPI.">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
-:root{--red:#d7191c;--old:#555;--ink:#1d1d1f;--paper:#fff;--muted:#666;--line:#e4e4e4}
+:root{--osm:#d7191c;--ocpi:#0b57b4;--ink:#1d1d1f;--paper:#fff;--muted:#666;--line:#e4e4e4}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:var(--ink);background:#eee}
 #map{position:absolute;inset:0}
-#panel{position:absolute;z-index:1000;top:12px;left:12px;width:340px;max-height:calc(100% - 24px);overflow:auto;background:var(--paper);border-radius:10px;box-shadow:0 4px 18px rgba(0,0,0,.18);padding:14px 16px}
+#panel{position:absolute;z-index:1000;top:12px;left:12px;width:345px;max-height:calc(100% - 24px);overflow:auto;background:var(--paper);border-radius:10px;box-shadow:0 4px 18px rgba(0,0,0,.18);padding:14px 16px}
 #panel h1{font-size:18px;margin:0 0 4px;line-height:1.25;padding-right:74px}
 #panel .sub{color:var(--muted);font-size:13px;margin-bottom:10px}
 .lang{position:absolute;top:12px;right:14px;font-size:12px}
 .lang button{border:1px solid var(--line);background:#fafafa;border-radius:6px;padding:2px 7px;cursor:pointer}
 .lang button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
 .key{display:grid;grid-template-columns:34px 1fr;gap:6px 8px;align-items:center;margin:10px 0;font-size:13.5px}
-.sw{height:0;border-top:5px solid var(--red)}
-.sw.est{border-top:4px dashed var(--red)}
-.sw.old{border-top:4px dashed var(--old)}
+.sw{height:0;border-top:6px solid var(--osm)}
+.sw.ramp{border-top:3px solid var(--osm)}
+.sw.ocpi{border-top:3px solid var(--ocpi)}
+.sw.est{border-top:3px dashed var(--ocpi)}
 .sw.buf{height:12px;border:0;background:rgba(215,25,28,.18);border-radius:3px}
 .sw.n2k{height:12px;border:2px solid #1a8a2e;background:rgba(26,138,46,.25);border-radius:3px}
-.sw.dist{border-top:2px dotted #0b62c4}
-.facts{background:#fff6f5;border:1px solid #f3c9c6;border-radius:8px;padding:8px 10px;margin:10px 0;font-size:13.5px}
-.facts b{color:var(--red)}
+.sw.dist{border-top:2px dotted #333}
+.facts{background:#f7f7f7;border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin:10px 0;font-size:13.5px}
+.facts table{border-collapse:collapse;width:100%;margin-top:4px}
+.facts td,.facts th{padding:3px 4px;border-bottom:1px solid #e6e6e6;text-align:right;font-variant-numeric:tabular-nums}
+.facts td:first-child,.facts th:first-child{text-align:left}
+.facts th{font-size:12px;color:var(--muted);font-weight:600}
+.c-osm{color:var(--osm)!important;font-weight:700}.c-ocpi{color:var(--ocpi)!important;font-weight:700}
 .ctl{margin:10px 0;font-size:13.5px}
 .ctl label{display:flex;gap:8px;align-items:center;margin:4px 0;cursor:pointer}
 input[type=range]{width:100%}
 .links a{display:inline-block;margin:4px 6px 0 0;padding:6px 10px;border-radius:7px;background:var(--ink);color:#fff;text-decoration:none;font-size:13px}
 .links a.sec{background:#f0f0f0;color:var(--ink)}
 .note{font-size:12px;color:var(--muted);margin-top:10px}
-.km{background:#fff;border:2px solid var(--red);color:var(--red);font-weight:700;font-size:11px;border-radius:9px;padding:0 5px;white-space:nowrap;text-align:center;line-height:16px}
-.km.est{border-style:dashed}
-.dl{background:#0b62c4;color:#fff;font-size:11.5px;font-weight:600;border-radius:5px;padding:1px 5px;white-space:nowrap}
-.dl.old{background:#666}
+.km{background:#fff;border:2px solid var(--osm);color:var(--osm);font-weight:700;font-size:11px;border-radius:9px;padding:0 5px;white-space:nowrap;text-align:center;line-height:16px}
+.nl{background:var(--osm);color:#fff;font-size:11px;font-weight:700;border-radius:5px;padding:1px 5px;white-space:nowrap}
+.dl{color:#fff;font-size:11.5px;font-weight:600;border-radius:5px;padding:1px 5px;white-space:nowrap}
+.dl.osm{background:var(--osm)}.dl.ocpi{background:var(--ocpi)}
 #toggle{display:none}
 @media (max-width:640px){
  #panel{top:auto;bottom:0;left:0;right:0;width:auto;max-height:46%;border-radius:12px 12px 0 0}
@@ -43,7 +48,6 @@ input[type=range]{width:100%}
  #toggle{display:block;position:absolute;right:12px;top:12px;border:0;background:#f0f0f0;border-radius:6px;padding:3px 8px}
  .lang{right:64px}
 }
-@media print{#panel{width:300px;box-shadow:none;border:1px solid #999}.leaflet-control-zoom,.leaflet-control-layers{display:none}}
 </style>
 </head>
 <body>
@@ -52,13 +56,14 @@ input[type=range]{width:100%}
  <button id="toggle" aria-label="toggle">▾</button>
  <div class="lang"><button data-l="ro" class="on">RO</button> <button data-l="en">EN</button></div>
  <h1 data-ro="Autostrada A13 Brașov–Bacău<br>Sânpetru – Hărman" data-en="A13 Motorway Brașov–Bacău<br>Sânpetru – Hărman"></h1>
- <div class="sub" data-ro="Traseul vechi vs. traseul nou, suprapuse pe planul cadastral OCPI (Km 8–24)" data-en="Old vs. new alignment, overlaid on the OCPI cadastral plan (Km 8–24)"></div>
+ <div class="sub" data-ro="Traseul public din OpenStreetMap, comparat cu planul cadastral OCPI (Km 8–24)" data-en="The public OpenStreetMap alignment, compared with the OCPI cadastral plan (Km 8–24)"></div>
 
  <div class="key">
-  <div class="sw"></div><div data-ro="<b>Traseu NOU</b> – plan OCPI Brașov, cerere 159987/2025" data-en="<b>NEW route</b> – OCPI Brașov plan, request 159987/2025"></div>
-  <div class="sw est"></div><div data-ro="Traseu nou, Km 18–22 – <i>estimat</i> (acoperit de legenda planului)" data-en="New route, Km 18–22 – <i>estimated</i> (hidden under the plan legend)"></div>
-  <div class="sw old"></div><div data-ro="Traseu VECHI (OpenStreetMap)" data-en="OLD route (OpenStreetMap)"></div>
-  <div class="sw buf"></div><div data-ro="Zone de 100 / 300 / 500 m față de traseul nou" data-en="100 / 300 / 500 m bands around the new route"></div>
+  <div class="sw"></div><div data-ro="<b>Traseu OpenStreetMap</b> (public)" data-en="<b>OpenStreetMap route</b> (public)"></div>
+  <div class="sw ramp"></div><div data-ro="Noduri rutiere / bretele (OpenStreetMap)" data-en="Interchanges / ramps (OpenStreetMap)"></div>
+  <div class="sw ocpi"></div><div data-ro="<b>Traseu OCPI</b> – plan cadastral, cerere 159987/2025" data-en="<b>OCPI route</b> – cadastral plan, request 159987/2025"></div>
+  <div class="sw est"></div><div data-ro="Traseu OCPI Km 18–22 – estimat (acoperit de legenda planului)" data-en="OCPI route Km 18–22 – estimated (hidden under the plan legend)"></div>
+  <div class="sw buf"></div><div data-ro="Zone de 100 / 300 / 500 m față de traseul OpenStreetMap" data-en="100 / 300 / 500 m bands around the OpenStreetMap route"></div>
   <div class="sw n2k"></div><div data-ro="Sit Natura 2000 ROSCI0055 – Dealul Cetății Lempeș – Mlaștina Hărman" data-en="Natura 2000 site ROSCI0055 – Dealul Cetății Lempeș – Mlaștina Hărman"></div>
   <div class="sw dist"></div><div data-ro="Distanța minimă până la zona construită" data-en="Shortest distance to the built-up area"></div>
  </div>
@@ -66,11 +71,11 @@ input[type=range]{width:100%}
  <div class="facts" id="facts"></div>
 
  <div class="ctl">
+  <label><input type="checkbox" id="cOcpi" checked> <span data-ro="Traseul OCPI" data-en="OCPI route"></span></label>
   <label><input type="checkbox" id="cPlan" checked> <span data-ro="Planul cadastral OCPI (scanat)" data-en="OCPI cadastral plan (scan)"></span></label>
-  <input type="range" id="op" min="0" max="100" value="40" aria-label="opacity">
-  <label><input type="checkbox" id="cOld" checked> <span data-ro="Traseul vechi" data-en="Old route"></span></label>
-  <label><input type="checkbox" id="cBuf" checked> <span data-ro="Zone de distanță" data-en="Distance bands"></span></label>
+  <input type="range" id="op" min="0" max="100" value="35" aria-label="opacity">
   <label><input type="checkbox" id="cN2k" checked> <span data-ro="Natura 2000 (Lempeș – Hărman)" data-en="Natura 2000 (Lempeș – Hărman)"></span></label>
+  <label><input type="checkbox" id="cBuf" checked> <span data-ro="Zone de distanță" data-en="Distance bands"></span></label>
   <label><input type="checkbox" id="cDist" checked> <span data-ro="Distanțe până la sat" data-en="Distances to the villages"></span></label>
  </div>
 
@@ -80,66 +85,62 @@ input[type=range]{width:100%}
   <a class="sec" href="data/a13_sanpetru_harman.kml" download data-ro="KML (Google My Maps)" data-en="KML (Google My Maps)"></a>
  </div>
 
- <div class="note" data-ro="Traseul nou a fost trasat manual după extrasul din planul cadastral 1:5000 (OCPI Brașov, 2025), georeferențiat pe căile ferate și drumurile din OpenStreetMap. Precizie estimată ±50–100 m; Km 19–21 nu sunt vizibili pe plan. Hartă informativă realizată de cetățeni – nu este un document oficial. Cod MIT · conținut CC BY 4.0 · date ODbL (© OpenStreetMap)." data-en="The new route was traced from the 1:5000 cadastral plan extract (OCPI Brașov, 2025), georeferenced on OpenStreetMap railways and roads. Estimated accuracy ±50–100 m; Km 19–21 are not visible on the plan. Citizen-made information map – not an official document. Code MIT · content CC BY 4.0 · data ODbL (© OpenStreetMap)."></div>
+ <div class="note" data-ro="Traseul OpenStreetMap și nodurile rutiere provin din OpenStreetMap. Traseul OCPI a fost trasat după extrasul din planul cadastral 1:5000 (OCPI Brașov, 2025), georeferențiat pe căile ferate și drumurile din OpenStreetMap (precizie estimată ±50–100 m; Km 19–21 nu sunt vizibili pe plan). Limita sitului Natura 2000: EEA. Hartă informativă realizată de cetățeni – nu este un document oficial. Cod MIT · conținut CC BY 4.0 · date ODbL (© OpenStreetMap)." data-en="The OpenStreetMap route and interchanges come from OpenStreetMap. The OCPI route was traced from the 1:5000 cadastral plan extract (OCPI Brașov, 2025), georeferenced on OpenStreetMap railways and roads (estimated accuracy ±50–100 m; Km 19–21 are not visible on the plan). Natura 2000 boundary: EEA. Citizen-made information map – not an official document. Code MIT · content CC BY 4.0 · data ODbL (© OpenStreetMap)."></div>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 let LANG='ro';
-const T={ro:{},en:{}};
 function applyLang(){document.querySelectorAll('[data-ro]').forEach(e=>e.innerHTML=e.dataset[LANG]);document.documentElement.lang=LANG;document.querySelectorAll('.lang button').forEach(b=>b.classList.toggle('on',b.dataset.l==LANG));renderFacts()}
 document.querySelectorAll('.lang button').forEach(b=>b.onclick=()=>{LANG=b.dataset.l;applyLang()});
 document.getElementById('toggle').onclick=()=>document.getElementById('panel').classList.toggle('min');
 
-const map=L.map('map',{zoomControl:true}).setView([45.708,25.67],13);
-const osm=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(map);
+const map=L.map('map').setView([45.708,25.67],13);
+const osmT=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(map);
 const sat=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:'Imagery © Esri, Maxar, Earthstar'});
 const topo=L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',{maxZoom:17,attribution:'© OpenTopoMap (CC-BY-SA)'});
-L.control.layers({'Hartă / Map':osm,'Satelit / Satellite':sat,'Relief / Topo':topo},null,{position:'topright'}).addTo(map);
+L.control.layers({'Hartă / Map':osmT,'Satelit / Satellite':sat,'Relief / Topo':topo},null,{position:'topright'}).addTo(map);
 L.control.scale({imperial:false}).addTo(map);
-
 map.createPane('plan');map.getPane('plan').style.zIndex=350;
-let plan,gj,facts=[],n2kLen={};
-const groups={n2k:L.layerGroup(),old:L.layerGroup(),buf:L.layerGroup(),dist:L.layerGroup(),route:L.layerGroup(),km:L.layerGroup()};
 
-Promise.all([fetch('data/plan_bounds.json?v=4').then(r=>r.json()),fetch('data/a13.geojson?v=4').then(r=>r.json())]).then(([b,data])=>{
- plan=L.imageOverlay('data/plan_ocpi.webp',[[b.south,b.west],[b.north,b.east]],{opacity:.40,pane:'plan'}).addTo(map);
- gj=data;
- const F=data.features;
- F.filter(f=>f.properties.kind=='n2k').forEach(f=>L.geoJSON(f,{style:{color:'#1a8a2e',weight:2,fillColor:'#1a8a2e',fillOpacity:.22}}).bindPopup(f.properties.name+' ('+f.properties.ha+' ha)').addTo(groups.n2k));
- F.filter(f=>f.properties.kind=='n2k_len').forEach(f=>n2kLen[f.properties.route]=f.properties.m);
- F.filter(f=>f.properties.kind=='buffer').sort((a,b)=>b.properties.d-a.properties.d).forEach(f=>{
-  L.geoJSON(f,{style:{stroke:false,fillColor:'#d7191c',fillOpacity:.10},interactive:false}).addTo(groups.buf)});
- F.filter(f=>f.properties.kind=='old').forEach(f=>L.geoJSON(f,{style:{color:'#444',weight:4,dashArray:'8 7',opacity:.9}}).bindTooltip(f.properties.name,{sticky:true}).addTo(groups.old));
- F.filter(f=>f.properties.kind=='new').forEach(f=>{
-  L.geoJSON(f,{style:{color:'#fff',weight:9,opacity:.9}}).addTo(groups.route);
-  L.geoJSON(f,{style:{color:'#d7191c',weight:5}}).bindTooltip(f.properties.name,{sticky:true}).addTo(groups.route)});
- F.filter(f=>f.properties.kind=='new_est').forEach(f=>L.geoJSON(f,{style:{color:'#d7191c',weight:4,dashArray:'6 8'}}).bindTooltip(f.properties.name,{sticky:true}).addTo(groups.route));
- F.filter(f=>f.properties.kind=='km').forEach(f=>{const [lo,la]=f.geometry.coordinates;
-  L.marker([la,lo],{icon:L.divIcon({className:'',html:'<div class="km">'+f.properties.name+'</div>',iconSize:[44,18],iconAnchor:[22,9]})}).addTo(groups.km)});
+let plan,S={};
+const G={n2k:L.layerGroup(),buf:L.layerGroup(),ocpi:L.layerGroup(),osm:L.layerGroup(),dist:L.layerGroup(),km:L.layerGroup()};
+const ll=c=>c.map(([lo,la])=>[la,lo]);
+Promise.all([fetch('data/plan_bounds.json?v=5').then(r=>r.json()),fetch('data/a13.geojson?v=5').then(r=>r.json())]).then(([b,data])=>{
+ plan=L.imageOverlay('data/plan_ocpi.webp',[[b.south,b.west],[b.north,b.east]],{opacity:.35,pane:'plan'}).addTo(map);
+ const F=data.features, K=k=>F.filter(f=>f.properties.kind==k);
+ S=(K('stats')[0]||{}).properties||{};
+ K('n2k').forEach(f=>L.geoJSON(f,{style:{color:'#1a8a2e',weight:2,fillColor:'#1a8a2e',fillOpacity:.22}}).bindPopup(f.properties.name+' ('+f.properties.ha+' ha)').addTo(G.n2k));
+ K('buffer').sort((a,b)=>b.properties.d-a.properties.d).forEach(f=>L.geoJSON(f,{style:{stroke:false,fillColor:'#d7191c',fillOpacity:.10},interactive:false}).addTo(G.buf));
+ K('ocpi').forEach(f=>L.polyline(ll(f.geometry.coordinates),{color:'#0b57b4',weight:3.5,opacity:.95}).bindTooltip(f.properties.name,{sticky:true}).addTo(G.ocpi));
+ K('ocpi_est').forEach(f=>L.polyline(ll(f.geometry.coordinates),{color:'#0b57b4',weight:3,dashArray:'6 7'}).bindTooltip(f.properties.name,{sticky:true}).addTo(G.ocpi));
+ K('osm').forEach(f=>{L.polyline(ll(f.geometry.coordinates),{color:'#fff',weight:10,opacity:.9}).addTo(G.osm);L.polyline(ll(f.geometry.coordinates),{color:'#d7191c',weight:6}).bindTooltip(f.properties.name,{sticky:true}).addTo(G.osm)});
+ K('ramp').forEach(f=>L.polyline(ll(f.geometry.coordinates),{color:'#d7191c',weight:3}).bindTooltip(f.properties.name,{sticky:true}).addTo(G.osm));
+ K('node_label').forEach(f=>{const[lo,la]=f.geometry.coordinates;L.marker([la,lo],{icon:L.divIcon({className:'',html:'<div class="nl">'+f.properties.name+'</div>',iconSize:[130,18],iconAnchor:[-8,26]})}).addTo(G.osm)});
+ K('km').forEach(f=>{const[lo,la]=f.geometry.coordinates;L.marker([la,lo],{icon:L.divIcon({className:'',html:'<div class="km">'+f.properties.name+'</div>',iconSize:[44,18],iconAnchor:[22,9]})}).addTo(G.km)});
  F.filter(f=>f.properties.kind.startsWith('dist_')).forEach(f=>{
-  const old=f.properties.route=='old';const c=f.geometry.coordinates;
-  L.polyline(c.map(([lo,la])=>[la,lo]),{color:old?'#666':'#0b62c4',weight:2,dashArray:'2 5'}).addTo(groups.dist);
+  const r=f.properties.route,c=f.geometry.coordinates;
+  L.polyline(ll(c),{color:r=='osm'?'#d7191c':'#0b57b4',weight:2,dashArray:'2 5'}).addTo(G.dist);
   const m=[(c[0][1]+c[1][1])/2,(c[0][0]+c[1][0])/2];
-  L.marker(m,{icon:L.divIcon({className:'',html:'<div class="dl'+(old?' old':'')+'">'+(old?'vechi/old ':'nou/new ')+f.properties.d+' m</div>',iconSize:[110,18],iconAnchor:old?[-6,-6]:[-6,22]})}).addTo(groups.dist);
-  facts.push(f.properties)});
- Object.values(groups).forEach(g=>g.addTo(map));
- map.fitBounds(L.geoJSON(F.filter(f=>f.properties.kind.startsWith('new'))).getBounds(),{padding:[20,20]});
+  L.marker(m,{icon:L.divIcon({className:'',html:'<div class="dl '+r+'">'+(r=='osm'?'OSM ':'OCPI ')+f.properties.d+' m</div>',iconSize:[90,18],iconAnchor:r=='osm'?[-6,22]:[-6,-6]})}).addTo(G.dist)});
+ ['n2k','buf','ocpi','osm','dist','km'].forEach(k=>G[k].addTo(map));
+ map.fitBounds(L.polyline(ll(K('ocpi')[0].geometry.coordinates.concat(K('ocpi')[1].geometry.coordinates))).getBounds(),{padding:[20,20]});
  renderFacts();
 });
 function renderFacts(){
- const g=(r,v)=>(facts.find(f=>f.route==r&&f.village==v)||{}).d;
- if(!facts.length)return;
- document.getElementById('facts').innerHTML= LANG=='ro'
- ? `<b>Traseul nou traversează situl Natura 2000 Dealul Cetății Lempeș – Mlaștina Hărman pe ~${n2kLen.new} m</b> (traseul vechi: ~${n2kLen.old} m).<br>Hărman: traseul nou trece la <b>~${g('new','Hărman')} m</b> de zona construită (traseul vechi: ~${g('old','Hărman')} m).<br>Sânpetru: traseul nou ~${g('new','Sânpetru')} m (vechi: ~${g('old','Sânpetru')} m).<br><small>Distanțe până la limita intravilanului din OpenStreetMap; limita sitului: EEA Natura 2000.</small>`
- : `<b>The new route crosses the Natura 2000 site Dealul Cetății Lempeș – Mlaștina Hărman for ~${n2kLen.new} m</b> (old route: ~${n2kLen.old} m).<br>Hărman: the new route passes <b>~${g('new','Hărman')} m</b> from the built-up area (old route: ~${g('old','Hărman')} m).<br>Sânpetru: new ~${g('new','Sânpetru')} m (old: ~${g('old','Sânpetru')} m).<br><small>Distances to the OpenStreetMap residential boundary; site boundary: EEA Natura 2000.</small>`;
+ if(!S.osm_n2k)return;
+ const ro=LANG=='ro';
+ document.getElementById('facts').innerHTML=`
+ <table><tr><th></th><th class="c-osm">OpenStreetMap</th><th class="c-ocpi">OCPI</th></tr>
+ <tr><td>${ro?'Prin situl Natura 2000':'Through the Natura 2000 site'}</td><td>~${S.osm_n2k} m</td><td>~${S.ocpi_n2k} m</td></tr>
+ <tr><td>${ro?'Distanța până la Hărman':'Distance to Hărman'}</td><td>~${S['osm_Hărman']} m</td><td>~${S['ocpi_Hărman']} m</td></tr>
+ <tr><td>${ro?'Distanța până la Sânpetru':'Distance to Sânpetru'}</td><td>~${S['osm_Sânpetru']} m</td><td>~${S['ocpi_Sânpetru']} m</td></tr></table>
+ <small>${ro?'Distanțe până la limita intravilanului din OpenStreetMap; limita sitului: EEA Natura 2000.':'Distances to the OpenStreetMap residential boundary; site boundary: EEA Natura 2000.'}</small>`;
 }
 const tog=(id,fn)=>document.getElementById(id).onchange=e=>fn(e.target.checked);
+const lay=(id,g)=>tog(id,v=>v?g.addTo(map):map.removeLayer(g));
+lay('cOcpi',G.ocpi);lay('cN2k',G.n2k);lay('cBuf',G.buf);lay('cDist',G.dist);
 tog('cPlan',v=>v?plan.addTo(map):map.removeLayer(plan));
-tog('cOld',v=>v?groups.old.addTo(map):map.removeLayer(groups.old));
-tog('cBuf',v=>v?groups.buf.addTo(map):map.removeLayer(groups.buf));
-tog('cN2k',v=>v?groups.n2k.addTo(map):map.removeLayer(groups.n2k));
-tog('cDist',v=>v?groups.dist.addTo(map):map.removeLayer(groups.dist));
 document.getElementById('op').oninput=e=>plan&&plan.setOpacity(e.target.value/100);
 applyLang();
 </script>

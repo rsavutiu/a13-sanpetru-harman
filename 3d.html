@@ -25,8 +25,8 @@ a{color:#0b62c4}
 <div id="map"></div>
 <div id="box">
  <h1>A13 · Sânpetru – Hărman (3D)</h1>
- <div class="k"><i></i> Traseu nou / New route</div>
- <div class="k"><i class="o"></i> Traseu vechi / Old route</div>
+ <div class="k"><i></i> Traseu OpenStreetMap (public) + noduri</div>
+ <div class="k"><i style="border-top-color:#3d8bff"></i> Traseu OCPI (plan cadastral)</div>
  <div class="k"><i style="border-top:10px solid rgba(26,138,46,.6)"></i> Natura 2000 Lempeș – Hărman</div>
  <div class="row">
   <button data-b="sat" class="on">Satelit</button><button data-b="plan">Plan OCPI</button><button data-b="osm">Hartă</button>
@@ -40,8 +40,8 @@ a{color:#0b62c4}
 <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
 <script>
 (async()=>{
-const b=await fetch('data/plan_bounds.json?v=4').then(r=>r.json());
-const data=await fetch('data/a13.geojson?v=4').then(r=>r.json());
+const b=await fetch('data/plan_bounds.json?v=5').then(r=>r.json());
+const data=await fetch('data/a13.geojson?v=5').then(r=>r.json());
 const map=new maplibregl.Map({container:'map',center:[25.665,45.705],zoom:13.2,pitch:62,bearing:-20,maxPitch:80,
  style:{version:8,sources:{
   sat:{type:'raster',tiles:['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],tileSize:256,maxzoom:19,attribution:'Imagery © Esri, Maxar, Earthstar'},
@@ -56,14 +56,16 @@ const map=new maplibregl.Map({container:'map',center:[25.665,45.705],zoom:13.2,p
   {id:'n2k',type:'fill',source:'a13',filter:['==',['get','kind'],'n2k'],paint:{'fill-color':'#1a8a2e','fill-opacity':.35}},
   {id:'n2kl',type:'line',source:'a13',filter:['==',['get','kind'],'n2k'],paint:{'line-color':'#7CFC8A','line-width':2}},
   {id:'buf',type:'fill',source:'a13',filter:['==',['get','kind'],'buffer'],paint:{'fill-color':'#d7191c','fill-opacity':.10}},
-  {id:'old',type:'line',source:'a13',filter:['==',['get','kind'],'old'],paint:{'line-color':'#f2f2f2','line-width':4,'line-dasharray':[2,1.5]}},
-  {id:'newcase',type:'line',source:'a13',filter:['==',['get','kind'],'new'],paint:{'line-color':'#fff','line-width':9}},
-  {id:'new',type:'line',source:'a13',filter:['==',['get','kind'],'new'],paint:{'line-color':'#d7191c','line-width':5.5}},
-  {id:'est',type:'line',source:'a13',filter:['==',['get','kind'],'new_est'],paint:{'line-color':'#d7191c','line-width':4,'line-dasharray':[1.5,1.5]}}
+  {id:'ocpi',type:'line',source:'a13',filter:['==',['get','kind'],'ocpi'],paint:{'line-color':'#3d8bff','line-width':3.5}},
+  {id:'ocpiest',type:'line',source:'a13',filter:['==',['get','kind'],'ocpi_est'],paint:{'line-color':'#3d8bff','line-width':3,'line-dasharray':[1.5,1.5]}},
+  {id:'ramp',type:'line',source:'a13',filter:['==',['get','kind'],'ramp'],paint:{'line-color':'#d7191c','line-width':3}},
+  {id:'osmcase',type:'line',source:'a13',filter:['==',['get','kind'],'osm'],paint:{'line-color':'#fff','line-width':9}},
+  {id:'osm',type:'line',source:'a13',filter:['==',['get','kind'],'osm'],paint:{'line-color':'#d7191c','line-width':5.5}}
  ],terrain:{source:'dem',exaggeration:2}}});
 map.addControl(new maplibregl.NavigationControl({visualizePitch:true}));
 map.addControl(new maplibregl.ScaleControl({unit:'metric'}));
 data.features.filter(f=>f.properties.kind=='km').forEach(f=>{const e=document.createElement('div');e.className='km';e.textContent=f.properties.name;new maplibregl.Marker({element:e}).setLngLat(f.geometry.coordinates).addTo(map)});
+data.features.filter(f=>f.properties.kind=='node_label').forEach(f=>{const e=document.createElement('div');e.className='vl';e.style.background='#d7191c';e.style.fontSize='11px';e.textContent=f.properties.name;new maplibregl.Marker({element:e,anchor:'bottom-left'}).setLngLat(f.geometry.coordinates).addTo(map)});
 [['Sânpetru',[25.632,45.706]],['Hărman',[25.686,45.714]],['Dealul Lempeș',[25.657,45.724]]].forEach(([n,c])=>{const e=document.createElement('div');e.className='vl';e.textContent=n;new maplibregl.Marker({element:e}).setLngLat(c).addTo(map)});
 document.querySelectorAll('[data-b]').forEach(btn=>btn.onclick=()=>{
  const v=btn.dataset.b;document.querySelectorAll('[data-b]').forEach(x=>x.classList.toggle('on',x==btn));
