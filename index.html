@@ -12,7 +12,7 @@
 html,body{margin:0;height:100%;font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:var(--ink);background:#eee}
 #map{position:absolute;inset:0}
 #panel{position:absolute;z-index:1000;top:12px;left:12px;width:340px;max-height:calc(100% - 24px);overflow:auto;background:var(--paper);border-radius:10px;box-shadow:0 4px 18px rgba(0,0,0,.18);padding:14px 16px}
-#panel h1{font-size:18px;margin:0 0 4px;line-height:1.25}
+#panel h1{font-size:18px;margin:0 0 4px;line-height:1.25;padding-right:74px}
 #panel .sub{color:var(--muted);font-size:13px;margin-bottom:10px}
 .lang{position:absolute;top:12px;right:14px;font-size:12px}
 .lang button{border:1px solid var(--line);background:#fafafa;border-radius:6px;padding:2px 7px;cursor:pointer}
@@ -67,7 +67,7 @@ input[type=range]{width:100%}
 
  <div class="ctl">
   <label><input type="checkbox" id="cPlan" checked> <span data-ro="Planul cadastral OCPI (scanat)" data-en="OCPI cadastral plan (scan)"></span></label>
-  <input type="range" id="op" min="0" max="100" value="55" aria-label="opacity">
+  <input type="range" id="op" min="0" max="100" value="40" aria-label="opacity">
   <label><input type="checkbox" id="cOld" checked> <span data-ro="Traseul vechi" data-en="Old route"></span></label>
   <label><input type="checkbox" id="cBuf" checked> <span data-ro="Zone de distanță" data-en="Distance bands"></span></label>
   <label><input type="checkbox" id="cN2k" checked> <span data-ro="Natura 2000 (Lempeș – Hărman)" data-en="Natura 2000 (Lempeș – Hărman)"></span></label>
@@ -103,7 +103,7 @@ let plan,gj,facts=[],n2kLen={};
 const groups={n2k:L.layerGroup(),old:L.layerGroup(),buf:L.layerGroup(),dist:L.layerGroup(),route:L.layerGroup(),km:L.layerGroup()};
 
 Promise.all([fetch('data/plan_bounds.json').then(r=>r.json()),fetch('data/a13.geojson').then(r=>r.json())]).then(([b,data])=>{
- plan=L.imageOverlay('data/plan_ocpi.webp',[[b.south,b.west],[b.north,b.east]],{opacity:.55,pane:'plan'}).addTo(map);
+ plan=L.imageOverlay('data/plan_ocpi.webp',[[b.south,b.west],[b.north,b.east]],{opacity:.40,pane:'plan'}).addTo(map);
  gj=data;
  const F=data.features;
  F.filter(f=>f.properties.kind=='n2k').forEach(f=>L.geoJSON(f,{style:{color:'#1a8a2e',weight:2,fillColor:'#1a8a2e',fillOpacity:.22}}).bindPopup(f.properties.name+' ('+f.properties.ha+' ha)').addTo(groups.n2k));
@@ -121,7 +121,7 @@ Promise.all([fetch('data/plan_bounds.json').then(r=>r.json()),fetch('data/a13.ge
   const old=f.properties.route=='old';const c=f.geometry.coordinates;
   L.polyline(c.map(([lo,la])=>[la,lo]),{color:old?'#666':'#0b62c4',weight:2,dashArray:'2 5'}).addTo(groups.dist);
   const m=[(c[0][1]+c[1][1])/2,(c[0][0]+c[1][0])/2];
-  L.marker(m,{icon:L.divIcon({className:'',html:'<div class="dl'+(old?' old':'')+'">'+(old?'vechi/old ':'')+f.properties.d+' m</div>',iconSize:[90,18],iconAnchor:[-4,9]})}).addTo(groups.dist);
+  L.marker(m,{icon:L.divIcon({className:'',html:'<div class="dl'+(old?' old':'')+'">'+(old?'vechi/old ':'nou/new ')+f.properties.d+' m</div>',iconSize:[110,18],iconAnchor:old?[-6,-6]:[-6,22]})}).addTo(groups.dist);
   facts.push(f.properties)});
  Object.values(groups).forEach(g=>g.addTo(map));
  map.fitBounds(L.geoJSON(F.filter(f=>f.properties.kind.startsWith('new'))).getBounds(),{padding:[20,20]});
