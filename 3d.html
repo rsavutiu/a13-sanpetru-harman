@@ -40,8 +40,8 @@ a{color:#0b62c4}
 <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
 <script>
 (async()=>{
-const b=await fetch('data/plan_bounds.json').then(r=>r.json());
-const data=await fetch('data/a13.geojson').then(r=>r.json());
+const b=await fetch('data/plan_bounds.json?v=4').then(r=>r.json());
+const data=await fetch('data/a13.geojson?v=4').then(r=>r.json());
 const map=new maplibregl.Map({container:'map',center:[25.665,45.705],zoom:13.2,pitch:62,bearing:-20,maxPitch:80,
  style:{version:8,sources:{
   sat:{type:'raster',tiles:['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],tileSize:256,maxzoom:19,attribution:'Imagery © Esri, Maxar, Earthstar'},

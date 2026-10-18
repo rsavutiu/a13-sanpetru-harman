@@ -102,7 +102,7 @@ map.createPane('plan');map.getPane('plan').style.zIndex=350;
 let plan,gj,facts=[],n2kLen={};
 const groups={n2k:L.layerGroup(),old:L.layerGroup(),buf:L.layerGroup(),dist:L.layerGroup(),route:L.layerGroup(),km:L.layerGroup()};
 
-Promise.all([fetch('data/plan_bounds.json').then(r=>r.json()),fetch('data/a13.geojson').then(r=>r.json())]).then(([b,data])=>{
+Promise.all([fetch('data/plan_bounds.json?v=4').then(r=>r.json()),fetch('data/a13.geojson?v=4').then(r=>r.json())]).then(([b,data])=>{
  plan=L.imageOverlay('data/plan_ocpi.webp',[[b.south,b.west],[b.north,b.east]],{opacity:.40,pane:'plan'}).addTo(map);
  gj=data;
  const F=data.features;
