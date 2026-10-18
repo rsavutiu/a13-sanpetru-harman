@@ -27,6 +27,7 @@ a{color:#0b62c4}
  <h1>A13 · Sânpetru – Hărman (3D)</h1>
  <div class="k"><i></i> Traseu nou / New route</div>
  <div class="k"><i class="o"></i> Traseu vechi / Old route</div>
+ <div class="k"><i style="border-top:10px solid rgba(26,138,46,.6)"></i> Natura 2000 Lempeș – Hărman</div>
  <div class="row">
   <button data-b="sat" class="on">Satelit</button><button data-b="plan">Plan OCPI</button><button data-b="osm">Hartă</button>
  </div>
@@ -52,6 +53,8 @@ const map=new maplibregl.Map({container:'map',center:[25.665,45.705],zoom:13.2,p
   {id:'osm',type:'raster',source:'osm',layout:{visibility:'none'}},
   {id:'sat',type:'raster',source:'sat'},
   {id:'plan',type:'raster',source:'plan',paint:{'raster-opacity':.85},layout:{visibility:'none'}},
+  {id:'n2k',type:'fill',source:'a13',filter:['==',['get','kind'],'n2k'],paint:{'fill-color':'#1a8a2e','fill-opacity':.35}},
+  {id:'n2kl',type:'line',source:'a13',filter:['==',['get','kind'],'n2k'],paint:{'line-color':'#7CFC8A','line-width':2}},
   {id:'buf',type:'fill',source:'a13',filter:['==',['get','kind'],'buffer'],paint:{'fill-color':'#d7191c','fill-opacity':.10}},
   {id:'old',type:'line',source:'a13',filter:['==',['get','kind'],'old'],paint:{'line-color':'#f2f2f2','line-width':4,'line-dasharray':[2,1.5]}},
   {id:'newcase',type:'line',source:'a13',filter:['==',['get','kind'],'new'],paint:{'line-color':'#fff','line-width':9}},
@@ -61,7 +64,7 @@ const map=new maplibregl.Map({container:'map',center:[25.665,45.705],zoom:13.2,p
 map.addControl(new maplibregl.NavigationControl({visualizePitch:true}));
 map.addControl(new maplibregl.ScaleControl({unit:'metric'}));
 data.features.filter(f=>f.properties.kind=='km').forEach(f=>{const e=document.createElement('div');e.className='km';e.textContent=f.properties.name;new maplibregl.Marker({element:e}).setLngLat(f.geometry.coordinates).addTo(map)});
-[['Sânpetru',[25.632,45.706]],['Hărman',[25.686,45.714]]].forEach(([n,c])=>{const e=document.createElement('div');e.className='vl';e.textContent=n;new maplibregl.Marker({element:e}).setLngLat(c).addTo(map)});
+[['Sânpetru',[25.632,45.706]],['Hărman',[25.686,45.714]],['Dealul Lempeș',[25.657,45.724]]].forEach(([n,c])=>{const e=document.createElement('div');e.className='vl';e.textContent=n;new maplibregl.Marker({element:e}).setLngLat(c).addTo(map)});
 document.querySelectorAll('[data-b]').forEach(btn=>btn.onclick=()=>{
  const v=btn.dataset.b;document.querySelectorAll('[data-b]').forEach(x=>x.classList.toggle('on',x==btn));
  map.setLayoutProperty('sat','visibility',v=='sat'||v=='plan'?'visible':'none');

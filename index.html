@@ -22,6 +22,7 @@ html,body{margin:0;height:100%;font:15px/1.45 system-ui,-apple-system,Segoe UI,R
 .sw.est{border-top:4px dashed var(--red)}
 .sw.old{border-top:4px dashed var(--old)}
 .sw.buf{height:12px;border:0;background:rgba(215,25,28,.18);border-radius:3px}
+.sw.n2k{height:12px;border:2px solid #1a8a2e;background:rgba(26,138,46,.25);border-radius:3px}
 .sw.dist{border-top:2px dotted #0b62c4}
 .facts{background:#fff6f5;border:1px solid #f3c9c6;border-radius:8px;padding:8px 10px;margin:10px 0;font-size:13.5px}
 .facts b{color:var(--red)}
@@ -58,6 +59,7 @@ input[type=range]{width:100%}
   <div class="sw est"></div><div data-ro="Traseu nou, Km 18–22 – <i>estimat</i> (acoperit de legenda planului)" data-en="New route, Km 18–22 – <i>estimated</i> (hidden under the plan legend)"></div>
   <div class="sw old"></div><div data-ro="Traseu VECHI (OpenStreetMap)" data-en="OLD route (OpenStreetMap)"></div>
   <div class="sw buf"></div><div data-ro="Zone de 100 / 300 / 500 m față de traseul nou" data-en="100 / 300 / 500 m bands around the new route"></div>
+  <div class="sw n2k"></div><div data-ro="Sit Natura 2000 ROSCI0055 – Dealul Cetății Lempeș – Mlaștina Hărman" data-en="Natura 2000 site ROSCI0055 – Dealul Cetății Lempeș – Mlaștina Hărman"></div>
   <div class="sw dist"></div><div data-ro="Distanța minimă până la zona construită" data-en="Shortest distance to the built-up area"></div>
  </div>
 
@@ -68,6 +70,7 @@ input[type=range]{width:100%}
   <input type="range" id="op" min="0" max="100" value="55" aria-label="opacity">
   <label><input type="checkbox" id="cOld" checked> <span data-ro="Traseul vechi" data-en="Old route"></span></label>
   <label><input type="checkbox" id="cBuf" checked> <span data-ro="Zone de distanță" data-en="Distance bands"></span></label>
+  <label><input type="checkbox" id="cN2k" checked> <span data-ro="Natura 2000 (Lempeș – Hărman)" data-en="Natura 2000 (Lempeș – Hărman)"></span></label>
   <label><input type="checkbox" id="cDist" checked> <span data-ro="Distanțe până la sat" data-en="Distances to the villages"></span></label>
  </div>
 
@@ -96,13 +99,15 @@ L.control.layers({'Hartă / Map':osm,'Satelit / Satellite':sat,'Relief / Topo':t
 L.control.scale({imperial:false}).addTo(map);
 
 map.createPane('plan');map.getPane('plan').style.zIndex=350;
-let plan,gj,facts=[];
-const groups={old:L.layerGroup(),buf:L.layerGroup(),dist:L.layerGroup(),route:L.layerGroup(),km:L.layerGroup()};
+let plan,gj,facts=[],n2kLen={};
+const groups={n2k:L.layerGroup(),old:L.layerGroup(),buf:L.layerGroup(),dist:L.layerGroup(),route:L.layerGroup(),km:L.layerGroup()};
 
 Promise.all([fetch('data/plan_bounds.json').then(r=>r.json()),fetch('data/a13.geojson').then(r=>r.json())]).then(([b,data])=>{
  plan=L.imageOverlay('data/plan_ocpi.webp',[[b.south,b.west],[b.north,b.east]],{opacity:.55,pane:'plan'}).addTo(map);
  gj=data;
  const F=data.features;
+ F.filter(f=>f.properties.kind=='n2k').forEach(f=>L.geoJSON(f,{style:{color:'#1a8a2e',weight:2,fillColor:'#1a8a2e',fillOpacity:.22}}).bindPopup(f.properties.name+' ('+f.properties.ha+' ha)').addTo(groups.n2k));
+ F.filter(f=>f.properties.kind=='n2k_len').forEach(f=>n2kLen[f.properties.route]=f.properties.m);
  F.filter(f=>f.properties.kind=='buffer').sort((a,b)=>b.properties.d-a.properties.d).forEach(f=>{
   L.geoJSON(f,{style:{stroke:false,fillColor:'#d7191c',fillOpacity:.10},interactive:false}).addTo(groups.buf)});
  F.filter(f=>f.properties.kind=='old').forEach(f=>L.geoJSON(f,{style:{color:'#444',weight:4,dashArray:'8 7',opacity:.9}}).bindTooltip(f.properties.name,{sticky:true}).addTo(groups.old));
@@ -126,13 +131,14 @@ function renderFacts(){
  const g=(r,v)=>(facts.find(f=>f.route==r&&f.village==v)||{}).d;
  if(!facts.length)return;
  document.getElementById('facts').innerHTML= LANG=='ro'
- ? `Hărman: traseul nou trece la <b>~${g('new','Hărman')} m</b> de zona construită (traseul vechi: ~${g('old','Hărman')} m).<br>Sânpetru: traseul nou ~${g('new','Sânpetru')} m (vechi: ~${g('old','Sânpetru')} m).<br><small>Distanțe până la limita intravilanului din OpenStreetMap.</small>`
- : `Hărman: the new route passes <b>~${g('new','Hărman')} m</b> from the built-up area (old route: ~${g('old','Hărman')} m).<br>Sânpetru: new ~${g('new','Sânpetru')} m (old: ~${g('old','Sânpetru')} m).<br><small>Distances to the OpenStreetMap residential boundary.</small>`;
+ ? `<b>Traseul nou traversează situl Natura 2000 Dealul Cetății Lempeș – Mlaștina Hărman pe ~${n2kLen.new} m</b> (traseul vechi: ~${n2kLen.old} m).<br>Hărman: traseul nou trece la <b>~${g('new','Hărman')} m</b> de zona construită (traseul vechi: ~${g('old','Hărman')} m).<br>Sânpetru: traseul nou ~${g('new','Sânpetru')} m (vechi: ~${g('old','Sânpetru')} m).<br><small>Distanțe până la limita intravilanului din OpenStreetMap; limita sitului: EEA Natura 2000.</small>`
+ : `<b>The new route crosses the Natura 2000 site Dealul Cetății Lempeș – Mlaștina Hărman for ~${n2kLen.new} m</b> (old route: ~${n2kLen.old} m).<br>Hărman: the new route passes <b>~${g('new','Hărman')} m</b> from the built-up area (old route: ~${g('old','Hărman')} m).<br>Sânpetru: new ~${g('new','Sânpetru')} m (old: ~${g('old','Sânpetru')} m).<br><small>Distances to the OpenStreetMap residential boundary; site boundary: EEA Natura 2000.</small>`;
 }
 const tog=(id,fn)=>document.getElementById(id).onchange=e=>fn(e.target.checked);
 tog('cPlan',v=>v?plan.addTo(map):map.removeLayer(plan));
 tog('cOld',v=>v?groups.old.addTo(map):map.removeLayer(groups.old));
 tog('cBuf',v=>v?groups.buf.addTo(map):map.removeLayer(groups.buf));
+tog('cN2k',v=>v?groups.n2k.addTo(map):map.removeLayer(groups.n2k));
 tog('cDist',v=>v?groups.dist.addTo(map):map.removeLayer(groups.dist));
 document.getElementById('op').oninput=e=>plan&&plan.setOpacity(e.target.value/100);
 applyLang();
