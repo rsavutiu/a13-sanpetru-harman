@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>A13 Sânpetru – Hărman · 3D</title>
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
+<style>
+html,body{margin:0;height:100%;font:14px/1.4 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+#map{position:absolute;inset:0}
+#box{position:absolute;z-index:2;top:10px;left:10px;background:#fff;border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,.2);padding:10px 12px;max-width:300px}
+#box h1{font-size:16px;margin:0 0 6px}
+#box .row{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+#box button{border:1px solid #ddd;background:#f6f6f6;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:13px}
+#box button.on{background:#1d1d1f;color:#fff;border-color:#1d1d1f}
+.k{display:flex;align-items:center;gap:8px;font-size:12.5px;margin:3px 0}
+.k i{display:inline-block;width:26px;border-top:4px solid #d7191c}
+.k i.o{border-top:4px dashed #ddd;filter:drop-shadow(0 0 1px #000)}
+.km{background:#fff;border:2px solid #d7191c;color:#d7191c;font-weight:700;font-size:11px;border-radius:9px;padding:0 5px;white-space:nowrap}
+.vl{background:rgba(0,0,0,.65);color:#fff;font-weight:700;font-size:13px;border-radius:5px;padding:1px 6px}
+a{color:#0b62c4}
+</style>
+</head>
+<body>
+<div id="map"></div>
+<div id="box">
+ <h1>A13 · Sânpetru – Hărman (3D)</h1>
+ <div class="k"><i></i> Traseu nou / New route</div>
+ <div class="k"><i class="o"></i> Traseu vechi / Old route</div>
+ <div class="row">
+  <button data-b="sat" class="on">Satelit</button><button data-b="plan">Plan OCPI</button><button data-b="osm">Hartă</button>
+ </div>
+ <div class="row">
+  <button data-v="nw">Vedere NV</button><button data-v="harman">Hărman</button><button data-v="sanpetru">Sânpetru</button><button data-v="top">2D</button>
+ </div>
+ <div class="row"><label>Relief ×<input id="ex" type="range" min="1" max="4" step=".5" value="2" style="width:110px;vertical-align:middle"></label></div>
+ <a href="index.html">← Harta 2D / 2D map</a>
+</div>
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<script>
+(async()=>{
+const b=await fetch('data/plan_bounds.json').then(r=>r.json());
+const data=await fetch('data/a13.geojson').then(r=>r.json());
+const map=new maplibregl.Map({container:'map',center:[25.665,45.705],zoom:13.2,pitch:62,bearing:-20,maxPitch:80,
+ style:{version:8,sources:{
+  sat:{type:'raster',tiles:['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],tileSize:256,maxzoom:19,attribution:'Imagery © Esri, Maxar, Earthstar'},
+  osm:{type:'raster',tiles:['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],tileSize:256,maxzoom:19,attribution:'© OpenStreetMap'},
+  dem:{type:'raster-dem',tiles:['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'],tileSize:256,maxzoom:14,encoding:'terrarium',attribution:'Terrain: Mapzen/AWS'},
+  plan:{type:'image',url:'data/plan_ocpi.webp',coordinates:[[b.west,b.north],[b.east,b.north],[b.east,b.south],[b.west,b.south]]},
+  a13:{type:'geojson',data}
+ },layers:[
+  {id:'osm',type:'raster',source:'osm',layout:{visibility:'none'}},
+  {id:'sat',type:'raster',source:'sat'},
+  {id:'plan',type:'raster',source:'plan',paint:{'raster-opacity':.85},layout:{visibility:'none'}},
+  {id:'buf',type:'fill',source:'a13',filter:['==',['get','kind'],'buffer'],paint:{'fill-color':'#d7191c','fill-opacity':.10}},
+  {id:'old',type:'line',source:'a13',filter:['==',['get','kind'],'old'],paint:{'line-color':'#f2f2f2','line-width':4,'line-dasharray':[2,1.5]}},
+  {id:'newcase',type:'line',source:'a13',filter:['==',['get','kind'],'new'],paint:{'line-color':'#fff','line-width':9}},
+  {id:'new',type:'line',source:'a13',filter:['==',['get','kind'],'new'],paint:{'line-color':'#d7191c','line-width':5.5}},
+  {id:'est',type:'line',source:'a13',filter:['==',['get','kind'],'new_est'],paint:{'line-color':'#d7191c','line-width':4,'line-dasharray':[1.5,1.5]}}
+ ],terrain:{source:'dem',exaggeration:2}}});
+map.addControl(new maplibregl.NavigationControl({visualizePitch:true}));
+map.addControl(new maplibregl.ScaleControl({unit:'metric'}));
+data.features.filter(f=>f.properties.kind=='km').forEach(f=>{const e=document.createElement('div');e.className='km';e.textContent=f.properties.name;new maplibregl.Marker({element:e}).setLngLat(f.geometry.coordinates).addTo(map)});
+[['Sânpetru',[25.632,45.706]],['Hărman',[25.686,45.714]]].forEach(([n,c])=>{const e=document.createElement('div');e.className='vl';e.textContent=n;new maplibregl.Marker({element:e}).setLngLat(c).addTo(map)});
+document.querySelectorAll('[data-b]').forEach(btn=>btn.onclick=()=>{
+ const v=btn.dataset.b;document.querySelectorAll('[data-b]').forEach(x=>x.classList.toggle('on',x==btn));
+ map.setLayoutProperty('sat','visibility',v=='sat'||v=='plan'?'visible':'none');
+ map.setLayoutProperty('osm','visibility',v=='osm'?'visible':'none');
+ map.setLayoutProperty('plan','visibility',v=='plan'?'visible':'none');});
+const views={nw:{center:[25.665,45.705],zoom:13.2,pitch:62,bearing:-20},harman:{center:[25.684,45.700],zoom:14.6,pitch:65,bearing:-35},sanpetru:{center:[25.64,45.722],zoom:14.4,pitch:65,bearing:20},top:{center:[25.668,45.71],zoom:12.8,pitch:0,bearing:0}};
+document.querySelectorAll('[data-v]').forEach(btn=>btn.onclick=()=>map.flyTo({...views[btn.dataset.v],duration:2200}));
+document.getElementById('ex').oninput=e=>map.setTerrain({source:'dem',exaggeration:+e.target.value});
+const p=new URLSearchParams(location.search);if(p.get('v')&&views[p.get('v')])map.jumpTo(views[p.get('v')]);
+if(p.get('clean')){document.getElementById('box').style.display='none'}
+window._map=map;
+})();
+</script>
+</body>
+</html>
