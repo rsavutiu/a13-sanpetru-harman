@@ -59,8 +59,8 @@ const map=new maplibregl.Map({container:'map',center:[25.665,45.705],zoom:13.2,p
   {id:'ocpi',type:'line',source:'a13',filter:['==',['get','kind'],'ocpi'],paint:{'line-color':'#3d8bff','line-width':3.5}},
   {id:'ocpiest',type:'line',source:'a13',filter:['==',['get','kind'],'ocpi_est'],paint:{'line-color':'#3d8bff','line-width':3,'line-dasharray':[1.5,1.5]}},
   {id:'ramp',type:'line',source:'a13',filter:['==',['get','kind'],'ramp'],paint:{'line-color':'#d7191c','line-width':3}},
-  {id:'osmcase',type:'line',source:'a13',filter:['==',['get','kind'],'osm'],paint:{'line-color':'#fff','line-width':9}},
-  {id:'osm',type:'line',source:'a13',filter:['==',['get','kind'],'osm'],paint:{'line-color':'#d7191c','line-width':5.5}}
+  {id:'r_osmcase',type:'line',source:'a13',filter:['==',['get','kind'],'osm'],paint:{'line-color':'#fff','line-width':9}},
+  {id:'r_osm',type:'line',source:'a13',filter:['==',['get','kind'],'osm'],paint:{'line-color':'#d7191c','line-width':5.5}}
  ],terrain:{source:'dem',exaggeration:2}}});
 map.addControl(new maplibregl.NavigationControl({visualizePitch:true}));
 map.addControl(new maplibregl.ScaleControl({unit:'metric'}));
